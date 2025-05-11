@@ -1,28 +1,27 @@
 DNS Changer Script for Linux
-A simple Bash script to change DNS servers on Linux systems (e.g., CentOS 7), test DNS speed, and restore original network settings. Designed to work on minimal systems with basic tools, it supports anti-censorship DNS servers (e.g., 403.online, Radar) for environments with restricted internet access, such as Iran.
+A lightweight Bash script to manage DNS servers on Linux systems, such as CentOS 7. It allows users to switch between multiple DNS providers, test DNS response times, and restore original network settings (e.g., DHCP-provided DNS). The script is designed for minimal systems and includes anti-censorship DNS servers (e.g., 403.online, Radar) to bypass internet restrictions, particularly in Iran.
 Features
 
-Change DNS: Select from a list of 13 DNS providers (e.g., Cloudflare, Google, 403.online) using a number-based menu.
-Test DNS Speed: Measure response time for each DNS server (requires dig from bind-utils).
-Restore Original Settings: Revert to the initial network configuration (e.g., DHCP-provided DNS) with a single command, even after restarting the script.
-Backup System: Automatically backs up network settings (/etc/resolv.conf, ifcfg-* files) before changes.
-Minimal Dependencies: Works with basic Bash and Linux commands; optional dig for speed tests.
-Anti-Censorship Support: Includes DNS servers optimized for bypassing restrictions in censored environments.
+Switch DNS Easily: Choose from 13 DNS providers using a simple number-based menu (1-13).
+Test DNS Speed: Measure response times for each DNS server (requires dig from bind-utils).
+Restore Original Settings: Revert to the initial network configuration (e.g., DHCP DNS like 10.0.2.3) at any time, even after restarting the script.
+Persistent Backup: Saves network settings (/etc/resolv.conf, ifcfg-* files) in /root/dns_backup for reliable restoration.
+Minimal Dependencies: Runs with basic Bash and Linux commands; optional dig for speed tests.
+Anti-Censorship DNS: Includes providers like 403.online and Radar to access restricted repositories in censored environments.
 
 Prerequisites
 
 Operating System: Linux (tested on CentOS 7, compatible with other distributions).
 Required Tools: Bash, standard Linux commands (cat, sed, cp, ip).
-Optional: dig (part of bind-utils) for DNS speed testing. The script can install it automatically if yum is available.
-Permissions: Root access (use sudo or run as root).
+Optional: dig (part of bind-utils) for DNS speed testing. The script can automatically install it if yum is available.
+Permissions: Root access (run with sudo or as the root user).
 
 Installation
 
-Clone or Download the Repository:
+Clone the Repository:
 git clone https://github.com/khshayar/DNS_changer.git
-cd YOUR_REPOSITORY
+cd DNS_changer
 
-Replace YOUR_USERNAME and YOUR_REPOSITORY with your GitHub username and repository name.
 
 Make the Script Executable:
 chmod +x dns_changer.sh
@@ -37,13 +36,13 @@ Run the Script:
 
 Menu Options:
 
-1. Display DNS list and test speed: Shows all available DNS servers with response times (requires dig). If dig is not installed, the script offers to install bind-utils.
-2. Change DNS: Select a DNS provider by entering its number (1-13). The script updates the network configuration and creates a backup.
-3. Restore original DNS: Reverts all changes to the original network settings (e.g., DHCP-provided DNS like 10.0.2.3). Works even after exiting and rerunning the script.
-4. Exit: Closes the script without changes.
+1. Display DNS list and test speed: Lists all DNS providers with their response times (requires dig). If dig is missing, the script prompts to install bind-utils.
+2. Change DNS: Select a DNS provider by entering its number (1-13). The script updates the network settings and creates a backup.
+3. Restore original DNS: Reverts to the network settings before the first DNS change (e.g., DHCP-provided DNS). Works across script restarts.
+4. Exit: Closes the script without making changes.
 
 
-Example:
+Example: Change DNS:
 DNS Changer Script
 Current system DNS servers:
 nameserver 10.0.2.3
@@ -62,13 +61,16 @@ Enter the number (1-13): 9
 Creating backup of network settings in /root/dns_backup...
 DNS set to 403.online in /etc/sysconfig/network-scripts/ifcfg-enp0s3.
 Do you want to restart the network to apply changes? (y/n): y
+Network service restarted.
 
 
-Restore Original Settings:
+Example: Restore Original Settings:
 Choose an option (1-4): 3
 Restoring original network settings from /root/dns_backup...
-Restored /etc/resolv.conf.
+Restored network-scripts from /root/dns_backup/network-scripts.
 Do you want to restart the network to apply restored settings? (y/n): y
+Network service restarted.
+Backup removed.
 
 
 
@@ -90,12 +92,16 @@ DNS.WATCH: 84.200.69.80 84.200.70.40
 
 Notes for Restricted Environments (e.g., Iran)
 
-Package Installation: If yum fails to install bind-utils due to sanctions, select DNS providers like 403.online (number 9) or Radar (number 10) to access repositories:./dns_changer.sh
+Installing Packages: If yum fails to install bind-utils due to sanctions, use 403.online (number 9) or Radar (number 10) to access repositories:./dns_changer.sh
 # Choose option 2, enter 9
 sudo yum update
 
 
-Local Repositories: Add local mirrors or repositories if needed:sudo yum install epel-release
+Local Repositories: Add local mirrors if needed:sudo yum install epel-release
+
+
+Proxy: If DNS changes are insufficient, configure a proxy:export http_proxy="http://YOUR_PROXY:PORT"
+sudo yum update
 
 
 
@@ -103,10 +109,10 @@ Troubleshooting
 
 DNS Not Changing:
 
-Check /etc/resolv.conf:cat /etc/resolv.conf
+Verify /etc/resolv.conf:cat /etc/resolv.conf
 
 
-Ensure the correct interface is updated:cat /etc/sysconfig/network-scripts/ifcfg-enp0s3
+Check the network interface configuration:cat /etc/sysconfig/network-scripts/ifcfg-enp0s3
 
 
 Restart the network:sudo systemctl restart network
@@ -116,7 +122,7 @@ Restart the network:sudo systemctl restart network
 
 DHCP Overriding DNS:
 
-If 10.0.2.3 persists (common in VirtualBox NAT), ensure PEERDNS=no in ifcfg-*:echo "PEERDNS=no" | sudo tee -a /etc/sysconfig/network-scripts/ifcfg-enp0s3
+If 10.0.2.3 persists (common in VirtualBox NAT), ensure PEERDNS=no in ifcfg-enp0s3:echo "PEERDNS=no" | sudo tee -a /etc/sysconfig/network-scripts/ifcfg-enp0s3
 sudo systemctl restart network
 
 
@@ -124,7 +130,7 @@ sudo systemctl restart network
 
 Restore Not Working:
 
-Verify the backup:ls -l /root/dns_backup
+Check the backup directory:ls -l /root/dns_backup
 cat /root/dns_backup/resolv.conf.bak
 
 
@@ -137,16 +143,34 @@ sudo systemctl restart network
 
 Package Installation Issues:
 
-Check yum errors:sudo yum install bind-utils -v
+Inspect yum errors:sudo yum install bind-utils -v
 
 
 Use 403.online or Radar DNS to resolve repository access issues.
 
 
 
+VirtualBox Notes
+If running in a VirtualBox VM with NAT networking:
+
+The default DNS (10.0.2.3) is provided by DHCP. Option 3 restores this setting by enabling PEERDNS=yes.
+If issues persist, switch to Bridged networking or disable DHCP:echo "PEERDNS=no" | sudo tee -a /etc/sysconfig/network-scripts/ifcfg-enp0s3
+sudo systemctl restart network
+
+
+
 Contributing
-Feel free to fork this repository, submit issues, or create pull requests to add new DNS providers or improve functionality.
+Contributions are welcome! To add new DNS providers, improve functionality, or fix bugs:
+
+Fork the repository.
+Create a new branch (git checkout -b feature-name).
+Commit your changes (git commit -m "Add feature").
+Push to the branch (git push origin feature-name).
+Open a pull request.
+
 License
 This project is licensed under the MIT License. See the LICENSE file for details.
 Contact
-For questions or support, open an issue on GitHub or contact [YOUR_EMAIL] (optional).
+For questions, suggestions, or support, open an issue on GitHub or contact the maintainer at [YOUR_EMAIL] (optional).
+
+Built with ❤️ by khshayar
