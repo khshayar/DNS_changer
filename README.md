@@ -19,7 +19,7 @@ Permissions: Root access (use sudo or run as root).
 Installation
 
 Clone or Download the Repository:
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+git clone https://github.com/khshayar/DNS_changer.git
 cd YOUR_REPOSITORY
 
 Replace YOUR_USERNAME and YOUR_REPOSITORY with your GitHub username and repository name.
